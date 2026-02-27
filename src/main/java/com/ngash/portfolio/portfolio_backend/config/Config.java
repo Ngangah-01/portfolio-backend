@@ -13,8 +13,11 @@ public class Config {
             @Override
             public void addCorsMappings(org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:5173","https://ngangah-dev.vercel.app") // Adjust this to your frontend URL
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedOrigins(
+                                "http://localhost:5173",
+                                "https://ngangah-dev.vercel.app"
+                        ) // Adjust this to your frontend URL
+                        .allowedMethods("GET", "POST","DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }

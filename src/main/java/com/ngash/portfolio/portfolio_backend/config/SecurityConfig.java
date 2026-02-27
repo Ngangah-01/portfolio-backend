@@ -16,7 +16,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/contact").permitAll()
+                .requestMatchers("/","/health","/api/contact").permitAll()
                 .anyRequest().authenticated()
             ));
         http.httpBasic(AbstractHttpConfigurer::disable);
