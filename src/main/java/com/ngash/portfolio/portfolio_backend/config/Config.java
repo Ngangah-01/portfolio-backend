@@ -15,7 +15,7 @@ public class Config {
                 registry.addMapping("/api/**")
                         .allowedOrigins(
                                 "http://localhost:5173",
-                                "https://ngangah-dev.vercel.app"
+                                "https://dev-ngangah.vercel.app"
                         ) // Adjust this to your frontend URL
                         .allowedMethods("GET", "POST","DELETE", "OPTIONS")
                         .allowedHeaders("*")
