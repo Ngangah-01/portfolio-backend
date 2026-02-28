@@ -1,15 +1,18 @@
 package com.ngash.portfolio.portfolio_backend.service;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${RESEND_API_KEY}")
+    private String resendApiKey;
 
     @Value("${app.mail.to}")
     private String mailTo;
@@ -17,29 +20,33 @@ public class EmailService {
     @Value("${app.mail.from}")
     private String mailFrom;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
+    public void sendEmail(String name, String email, String message) {
+        try {
+            String jsonBody = """
+                {
+                  "from": "%s",
+                  "to": ["%s"],
+                  "subject": "New Contact Form Submission",
+                  "html": "<strong>Name:</strong> %s<br/><strong>Email:</strong> %s<br/><strong>Message:</strong><br/>%s"
+                }
+                """.formatted(mailFrom, mailTo, name, email, message);
 
-    @Async
-    public void sendContactNotification(String firstName, String lastName, String email, String message) {
-        SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setTo(mailTo);
-        mail.setFrom(mailFrom);
-        mail.setSubject("New Portfolio Contact: " + firstName + " " + lastName);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.resend.com/emails"))
+                    .header("Authorization", "Bearer " + resendApiKey)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
 
-        String body = """
-                You received a new message from your portfolio contact form.
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-                Name: %s %s
-                Email: %s
+            if (response.statusCode() >= 400) {
+                throw new RuntimeException("Failed to send email via Resend: " + response.body());
+            }
 
-                Message:
-                %s
-                """.formatted(firstName, lastName, email, message);
-
-        mail.setText(body);
-
-        mailSender.send(mail);
+        } catch (Exception e) {
+            throw new RuntimeException("Email sending failed", e);
+        }
     }
 }

@@ -38,9 +38,8 @@ public class ContactService {
 
         //trigger email notification
         try {
-            emailService.sendContactNotification(
-                    savedMsg.getFirstName(),
-                    savedMsg.getLastName(),
+            emailService.sendEmail(
+                    savedMsg.getFirstName() + " " + savedMsg.getLastName(),
                     savedMsg.getEmail(),
                     savedMsg.getMessage()
             );
